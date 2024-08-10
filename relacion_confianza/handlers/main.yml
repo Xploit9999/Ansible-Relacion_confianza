@@ -1,0 +1,51 @@
+---
+# handlers file for relacion_confianza
+# --- RedHat y Solaris relacion de confianza -----
+- name: Crear relacion de confianza RHEL | Se generan llaves para la relacion de confianza
+  user:
+    name: "{{ item }}"
+    generate_ssh_key: true
+    ssh_key_file: "/home/{{ item }}/.ssh/id_rsa"
+  loop: "{{ usuarios }}"
+
+- name: Crear relacion de confianza Solaris | Se generan llaves para la relacion de confianza
+  user:
+    name: "{{ item }}"
+    generate_ssh_key: true
+    ssh_key_file: "/export/home/{{ item }}/.ssh/id_rsa"
+  loop: "{{ usuarios }}"
+
+- name: Crear relacion de confianza RHEL | Se recolecta las llaves creadas y se ponen en el master server
+  fetch:
+    src: "/home/{{ item }}/.ssh/id_rsa.pub"
+    dest: "{{ llaves_almacenadas }}{{ ansible_hostname }}/{{ item }}-id_rsa.pub"
+    flat: yes
+  loop: "{{ usuarios }}"
+
+- name: Crear relacion de confianza Solaris | Se recolecta las llaves creadas y se ponen en el master server
+  fetch:
+    src: "/export/home/{{ item }}/.ssh/id_rsa.pub"
+    dest: "{{ llaves_almacenadas }}{{ ansible_hostname }}/{{ item }}-id_rsa.pub"
+    flat: yes
+  loop: "{{ usuarios }}"
+
+- name: Crear relacion de confianza | Se indentifica llave al cual se va mandar, excluyendo el servidor origen mismo
+  local_action:
+    module: find
+    paths: "{{ llaves_almacenadas }}"
+    recurse: no
+    file_type: directory
+    excludes: "{{ ansible_hostname }}" 
+  register: llaves
+
+- name: Crear relacion de confianza | Se obtiene path del nodo para el cual tiene la llave a quemar en el nodo destino
+  set_fact:
+    ruta: "{{ llaves.files | map(attribute='path') | first }}"
+
+- name: Crear relacion de confianza | Crea la relacion de confianza
+  authorized_key:
+    user: "{{ item }}"
+    state: present
+    key: "{{ lookup ('file', '{{ ruta }}/{{ item }}-id_rsa.pub') }}"
+  loop: "{{ usuarios }}"
+# ---

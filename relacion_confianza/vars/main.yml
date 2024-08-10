@@ -1,0 +1,3 @@
+---
+# vars file for relacion_confianza#
+llaves_almacenadas: /ansible/keys/

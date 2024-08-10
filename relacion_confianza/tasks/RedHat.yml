@@ -1,0 +1,13 @@
+---
+- name: Relacion de confianza | Inicia proceso para RedHat
+  debug:
+    msg: 'Iniciando...'
+  changed_when: true
+  notify:
+    - Crear relacion de confianza RHEL | Se generan llaves para la relacion de confianza
+    - Crear relacion de confianza RHEL | Se recolecta las llaves creadas y se ponen en el master server
+    - Crear relacion de confianza | Se indentifica llave al cual se va mandar, excluyendo el servidor origen mismo
+    - Crear relacion de confianza | Se obtiene path del nodo para el cual tiene la llave a quemar en el nodo destino
+    - Crear relacion de confianza | Crea la relacion de confianza
+
+- meta: flush_handlers

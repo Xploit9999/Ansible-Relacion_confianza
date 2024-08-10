@@ -1,0 +1,19 @@
+---
+# tasks file for relacion_confianza
+- block:
+  - name: Relacion de confianza | Valida si hay llaves viejas en el master
+    find:
+      path: "{{ llaves_almacenadas }}"
+      file_type: directory
+    register: obsoleto
+
+  - name: Relacion de confianza | Elimina llaves viejas en caso de encontrase
+    file:
+      path: '{{ item.path }}'
+      state: absent
+    loop: '{{ obsoleto.files }}'
+  delegate_to: localhost
+  run_once: true
+    
+- include_tasks: '{{ ansible_os_family }}.yml'
+
