@@ -1,1 +1,18 @@
+---
+- name: Creación de relación de confianza para RedHat y Solaris
+  hosts: all
+  gather_facts: false
+  pre_tasks:
 
+  - name: Relación de confianza | Recolecta fact del S.O
+    setup:
+      gather_subset:
+        - '!all'
+        - '!min'
+        - os_family
+    async: 100
+    poll: 1
+
+  roles:
+    - relacion_confianza
+...
